@@ -10,7 +10,11 @@ do_settings_sections(
     'wp2d_plugin'       // page id
 );
 ?>
-
-<input name="submit" class="button button-primary" type="submit" value=" <?php echo __('Save') ?> ">
-
+    <input name="submit" class="button button-primary" type="submit" value=" <?php echo __('Save') ?> ">
 </form>
+<p>
+<hr>
+<h3> How to get Discord channel webhook URL</h3>
+<h4> 1. This is your channed and you have the admin privelegies</h4>
+<p>
+
