@@ -9,7 +9,7 @@ Auto-post to Discord makes automatic when your post is published, manually, or s
 
 You can enable or disable auto-posting for the current post with the checkbox in the post's meta (defaultly enabled).
 
-Supported autoposting to one Discrod channel.
+Supported auto-posting to one Discrod channel.
 
 Plugin web-page
 -

@@ -15,7 +15,7 @@ Auto-posting the announces of publishing posts to the Discord channel.
 
 A Wordpress plugin to auto-post the announces of publishing Wordpress posts to the Discord channel.
 
-Supported autoposting to one Discrod channel.
+Supported auto-posting to one Discrod channel.
 
 Auto-post to Discord makes automatic when your post is published, manually, or scheduled.
 

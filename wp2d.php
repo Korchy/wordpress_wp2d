@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name:	WP2D
+Plugin Name:	WP2D Auto Post
 Plugin URI:		https://progr.interplanety.org/en/wordpress-plugin-wp2d/
 Version:		1.0.0
 Author:			Nikita Akimov
