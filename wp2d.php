@@ -14,24 +14,11 @@ if(!defined('ABSPATH')) {
 	exit;
 }
 
-function pn() {
-	// get plugin name
-	if (is_admin()) {
-		$plugin_data = get_plugin_data(__FILE__);
-		return $plugin_data['Name'];
-	} else {
-		return '';
-	}
-}
-function pnl() {
-	// plugin name lowercase
-	return mb_strtolower(pn());
-}
-
 
 // ---------- autoposting
 
 function wp2d_post_to_discord($new_status, $old_status, $post) {
+	// autopost
 	if(in_array($post->post_type, ['post', 'page'])
 			&& $new_status === 'publish'
 			&& $old_status !== 'publish') {
@@ -40,24 +27,24 @@ function wp2d_post_to_discord($new_status, $old_status, $post) {
 		// first check in $_POST because transition_post_status event executes before saving post
 		//	so this value can be changed on the form but this change stil is not saved
 		$do_autopost = 'no';
-		if(isset($_POST)) {
+		if(isset($_POST) && $_POST) {
 			// published by user pressed a button
-			if(isset($_POST[pnl().'_do_autopost']) && $_POST[pnl().'_do_autopost']) {
-				$do_autopost = ($_POST[pnl().'_do_autopost'] == 'on' ? 'yes' : 'no');
+			if(isset($_POST['wp2d_do_autopost']) && $_POST['wp2d_do_autopost']) {
+				$do_autopost = ($_POST['wp2d_do_autopost'] == 'on' ? 'yes' : 'no');
 			}
 		} else {
 			// published by shedule - ?
 			$do_autopost = get_post_meta(
 				$post->ID,
-				pnl().'_do_autopost',
+				'wp2d_do_autopost',
 				true
 			);
 		}
 
 		if($do_autopost && $do_autopost == 'yes') {
 			// check webhook_url existed
-			$plugin_options = get_option(pnl().'_plugin_options');
-			$webhook_url = $plugin_options[pnl().'_webhook_url'];
+			$plugin_options = get_option('wp2d_plugin_options');
+			$webhook_url = $plugin_options['wp2d_webhook_url'];
 
 			if($webhook_url) {
 
@@ -137,7 +124,7 @@ function wp2d_post_to_discord($new_status, $old_status, $post) {
 	}
 }
 
-add_action('transition_post_status',  pnl().'_post_to_discord', 10, 3);
+add_action('transition_post_status',  'wp2d_post_to_discord', 10, 3);
 
 
 // ---------- settings menu
@@ -145,14 +132,14 @@ add_action('transition_post_status',  pnl().'_post_to_discord', 10, 3);
 function wp2d_add_options_page() {
 	// function to render the options page
 	add_options_page(
-		pn(),						// page title text
-		pn(),						// menu item text
+		'WP2D',						// page title text
+		'WP2D',						// menu item text
 		'manage_options',			// user rights
 		'wp2d/wp2d-options.php'		// file to render the options view page
 	);
 }
 
-add_action('admin_menu',  pnl().'_add_options_page');
+add_action('admin_menu',  'wp2d_add_options_page');
 
 
 // ---------- page
@@ -161,23 +148,23 @@ function wp2d_register_settings() {
 	// function to register plugin options
     // whole wp2d settings
 	register_setting(
-		pnl().'_plugin_options',	// option group
-		pnl().'_plugin_options'		// option name
+		'wp2d_plugin_options',	// option group
+		'wp2d_plugin_options'		// option name
 	);
 	// discord api section in settings
     add_settings_section(
 		'discord_api',				// id
 		'Discord API Settings',		// title
-		pnl().'_section_text',		// function name for render section title
-		pnl().'_plugin'				// page id for do_settings_section
+		'wp2d_section_text',		// function name for render section title
+		'wp2d_plugin'				// page id for do_settings_section
 	);
 	// options fields
 	// webhook
     add_settings_field(
-		pnl().'_webhook_url',		// id
+		'wp2d_webhook_url',		// id
 		'Webhook URL',				// field title
-		pnl().'_webhook_url',		// function name for rendering this option
-		pnl().'_plugin',			// menu page id
+		'wp2d_webhook_url',		// function name for rendering this option
+		'wp2d_plugin',			// menu page id
 		'discord_api'				// section id
 	);
 }
@@ -187,12 +174,12 @@ function wp2d_section_text() {
 }
 // functions for current option render
 function wp2d_webhook_url() {
-    $options = get_option(pnl().'_plugin_options');
-    echo '<input id="' . pnl().'_webhook_url" name="'.pnl().'_plugin_options['.pnl().'_webhook_url]" type="text"
-		value="' . esc_attr($options[pnl().'_webhook_url']) . '">';
+    $options = get_option('wp2d_plugin_options');
+    echo '<input id="' . 'wp2d_webhook_url" name="'.'wp2d_plugin_options['.'wp2d_webhook_url]" type="text"
+		value="' . esc_attr($options['wp2d_webhook_url']) . '" style="width: 90%;">';
 }
 
-add_action('admin_init',  pnl().'_register_settings');
+add_action('admin_init',  'wp2d_register_settings');
 
 
 // ---------- "settings" link for plugin on plugins page
@@ -206,7 +193,7 @@ function wp2d_settings_link($links) {
 	);
 }
 
-add_filter('plugin_action_links_' . plugin_basename( __FILE__ ),  pnl().'_settings_link');
+add_filter('plugin_action_links_' . plugin_basename( __FILE__ ),  'wp2d_settings_link');
 
 
 // ---------- adding metabox with option to posts
@@ -214,9 +201,9 @@ add_filter('plugin_action_links_' . plugin_basename( __FILE__ ),  pnl().'_settin
 function wp2d_meta_box() {
     // define meta_box
     add_meta_box(
-		pnl().'_metabox',			// id
-		pn(),						// title
-		pnl().'_meta_box_render',	// function name for rendering this metabox
+		'wp2d_metabox',			// id
+		'WP2D',						// title
+		'wp2d_meta_box_render',	// function name for rendering this metabox
 		array(
 			'post',
 			'page'
@@ -229,18 +216,18 @@ function wp2d_meta_box() {
 // functions for current metabox render
 function wp2d_meta_box_render($post) {
 	// security hidden field
-	wp_nonce_field(plugin_basename(__FILE__), pnl().'_meta_nonce');
+	wp_nonce_field(plugin_basename(__FILE__), 'wp2d_meta_nonce');
 	// wp2d_do_autopost checkbox field
 	$do_autopost = get_post_meta(
 						$post->ID,
-						pnl().'_do_autopost',
+						'wp2d_do_autopost',
 						true
 					);
 	$do_autopost = ($do_autopost ? $do_autopost : 'yes');	// by default = 'yes'
 	?>
 	
-	<label for=" <?php echo pnl().'_do_autopost'; ?> ">
-		<input type="checkbox" name="<?php echo pnl().'_do_autopost'; ?>" id="<?php echo pnl().'_do_autopost'; ?>"
+	<label for=" <?php echo 'wp2d_do_autopost'; ?> ">
+		<input type="checkbox" name="<?php echo 'wp2d_do_autopost'; ?>" id="<?php echo 'wp2d_do_autopost'; ?>"
 			<?php echo ($do_autopost == 'yes' ? ' checked="checked"' : ''); ?>
 			>
 		<?php echo __('Autopost to Discord'); ?>
@@ -252,23 +239,23 @@ function wp2d_meta_box_render($post) {
 // function for saving metabox data
 function wp2d_meta_box_save($post_id) {
 	// check and save/update
-    if(!isset($_POST[pnl().'_meta_nonce'])) {
+    if(!isset($_POST['wp2d_meta_nonce'])) {
 		return $post_id;
 	}
-    if(!wp_verify_nonce($_POST[pnl().'_meta_nonce'], plugin_basename(__FILE__))) {
+    if(!wp_verify_nonce($_POST['wp2d_meta_nonce'], plugin_basename(__FILE__))) {
 		return $post_id;
 	}
     if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
 		return $post_id;
 	}
-    if(isset($_POST[pnl().'_do_autopost'])) {
-		update_post_meta($post_id, pnl().'_do_autopost', 'yes');
+    if(isset($_POST['wp2d_do_autopost'])) {
+		update_post_meta($post_id, 'wp2d_do_autopost', 'yes');
     } else {
-		update_post_meta($post_id, pnl().'_do_autopost', 'no');
+		update_post_meta($post_id, 'wp2d_do_autopost', 'no');
 	}
 }
 
-add_action('add_meta_boxes', pnl().'_meta_box');
-add_action('save_post', pnl().'_meta_box_save');
+add_action('add_meta_boxes', 'wp2d_meta_box');
+add_action('save_post', 'wp2d_meta_box_save');
 
 ?>
