@@ -73,7 +73,7 @@ function wp2d_post_to_discord($new_status, $old_status, $post) {
 				}
 
 				// permalink
-				$permalink = get_permalink();
+				$permalink = get_permalink($post->ID);
 				if (in_array($post->post_status, array('draft', 'pending', 'auto-draft', 'future'))) {
 					$permalink_arr = get_sample_permalink($post->ID);
 					$permalink = str_replace('%postname%', $permalink_arr[1], $permalink_arr[0]);
