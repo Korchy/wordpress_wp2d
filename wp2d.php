@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name:	WP2D Auto Post
+Plugin Name:	wp2d Auto Post
 Plugin URI:		https://progr.interplanety.org/en/wordpress-plugin-wp2d/
 Version:		1.0.0
 Author:			Nikita Akimov
@@ -116,9 +116,17 @@ function wp2d_post_to_discord($new_status, $old_status, $post) {
 						'content' => $content
 					)
 				);
-				$context = stream_context_create($opts);
-				$result = file_get_contents($webhook_url, false, $context);
-				// error_log($result);
+
+				// make POST request to Discord
+				$response = wp_remote_post(
+					$webhook_url,
+					array(
+						'method' => 'POST',
+						'headers' => array('Content-Type' => 'application/json'),
+						'body' => $content
+						)
+				);
+				// error_log(print_r($response, true));
 			}
 		}
 	}
